@@ -37,21 +37,10 @@ static char	*my_strcat(char *dest, char *src, char *src2)
 static char	*ft_strjoin_for_gnl(char *s1, char *s2)
 {
 	char	*joined_string;
-	size_t	size;
 
-	if (BUFFER_SIZE == 1)
-	{
-		size = 0;
-		while (1)
-		{
-			if (s1[size++] == 0)
-				break ;
-		}
-		size += 2;
-	}
-	else
-		size = ft_strlen(s1) + ft_strlen(s2) + 1;
-	joined_string = malloc(size);
+	if (s1 == NULL || s2 == NULL)
+		return (NULL);
+	joined_string = malloc(ft_strlen(s1) + ft_strlen(s2) + 1);
 	if (joined_string == NULL)
 	{
 		free(s1);
@@ -81,9 +70,11 @@ static char	*read_next_line(int fd, char *staticbuffer)
 		}
 		buffer[read_ret_value] = '\0';
 		if (staticbuffer == NULL)
-			staticbuffer = ft_strdup(buffer);
-		else
-			staticbuffer = ft_strjoin_for_gnl(staticbuffer, buffer);
+		{
+			staticbuffer = malloc(1);
+			staticbuffer[0] = '\0';
+		}
+		staticbuffer = ft_strjoin_for_gnl(staticbuffer, buffer);
 	}
 	free(buffer);
 	return (staticbuffer);
@@ -120,7 +111,7 @@ char	*get_next_line(int fd)
 	static char	*staticbuffer;
 	char		*new_line;
 	char		*old_static_buffer;
-	int			new_line_index;
+	int			new_line_idx;
 	int			new_staticbuf_len;
 
 	if (BUFFER_SIZE < 1 || fd < 0)
@@ -128,13 +119,13 @@ char	*get_next_line(int fd)
 	staticbuffer = read_next_line(fd, staticbuffer);
 	if (staticbuffer == NULL)
 		return (NULL);
-	new_line_index = (ft_strchr(staticbuffer, '\n') - staticbuffer) + 1;
-	if (new_line_index < 0)
-		new_line_index = ft_strlen(staticbuffer);
-	new_line = ft_substr(staticbuffer, 0, new_line_index);
-	new_staticbuf_len = ft_strlen(staticbuffer + new_line_index);
+	new_line_idx = 0;
+	while (staticbuffer[new_line_idx] && staticbuffer[new_line_idx] != '\n')
+		new_line_idx++;
+	new_line = ft_substr(staticbuffer, 0, new_line_idx + 1);
+	new_staticbuf_len = ft_strlen(staticbuffer + new_line_idx + 1);
 	old_static_buffer = staticbuffer;
-	staticbuffer = ft_substr(staticbuffer, new_line_index, new_staticbuf_len);
+	staticbuffer = ft_substr(staticbuffer, new_line_idx + 1, new_staticbuf_len);
 	free(old_static_buffer);
 	return (new_line);
 }
